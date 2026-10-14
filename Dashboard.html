@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>TCS FY2026 FP&A Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f6fb;--card:#fff;--tx:#14213d;--mut:#64708a;--bd:#e3e8f2;--pri:#3b5bdb;--pri2:#e7ecff;--good:#12935f;--bad:#d6336c;--c1:#3b5bdb;--c2:#12b886;--c3:#f59f00;--c4:#d6336c;--c5:#7048e8;--c6:#868e96;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1424;--card:#171e33;--tx:#e8ecf7;--mut:#97a3c0;--bd:#262f4b;--pri:#7c93ff;--pri2:#222b4d;--good:#3ddc97;--bad:#ff6b9a;--c1:#7c93ff;--c2:#38d9a9;--c3:#ffd43b;--c4:#ff6b9a;--c5:#b197fc;--c6:#adb5bd}}
+:root[data-theme="dark"]{--bg:#0f1424;--card:#171e33;--tx:#e8ecf7;--mut:#97a3c0;--bd:#262f4b;--pri:#7c93ff;--pri2:#222b4d;--good:#3ddc97;--bad:#ff6b9a;--c1:#7c93ff;--c2:#38d9a9;--c3:#ffd43b;--c4:#ff6b9a;--c5:#b197fc;--c6:#adb5bd}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:16px}
+header h1{font-size:clamp(1.15rem,4vw,1.7rem);margin:0}header p{margin:2px 0 0;color:var(--mut);font-size:.85rem}
+header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:12px}
+button,select{font:inherit;color:var(--tx);min-height:44px;border-radius:10px;border:1px solid var(--bd);background:var(--card);padding:0 12px;cursor:pointer}
+nav{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:8px;margin-bottom:12px}
+nav button{font-weight:600;font-size:.88rem}nav button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.filters{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin-bottom:14px;background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px}
+.filters label{display:flex;flex-direction:column;font-size:.75rem;color:var(--mut);gap:4px;flex:1 1 120px}
+.filters select{width:100%}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.kpi small{color:var(--mut);display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+.kpi b{font-size:clamp(1.15rem,4.5vw,1.55rem);display:block;margin:2px 0}
+.up{color:var(--good)}.dn{color:var(--bad)}.kpi span{font-size:.8rem;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,420px),1fr));gap:12px;margin-bottom:14px}
+.card h3{margin:0 0 8px;font-size:.95rem}.ch{position:relative;height:300px}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th,td{padding:8px 6px;text-align:right;border-bottom:1px solid var(--bd)}th:first-child,td:first-child{text-align:left}
+thead th{color:var(--mut);font-weight:600;font-size:.75rem}tbody th{font-weight:500}
+.sec th{background:var(--pri2);color:var(--pri);text-align:left;font-weight:700}
+.badge{display:inline-block;padding:1px 8px;border-radius:99px;font-size:.75rem;font-weight:700}
+.F{background:#d3f9e6;color:#0b6b43}.UF{background:#ffe0ea;color:#a01346}
+.note{color:var(--mut);font-size:.78rem;margin-top:14px}
+.ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:10px}.ins h3{color:var(--pri)}.ins p{margin:0;font-size:.9rem}
+@media(max-width:640px){
+.wrap{padding:12px}.ch{height:250px}
+header{flex-direction:column}nav{grid-template-columns:repeat(2,1fr)}
+table,tbody,tr,th,td{display:block}thead{display:none}
+tr{display:grid;grid-template-columns:repeat(3,1fr);gap:2px 6px;padding:8px 0;border-bottom:1px solid var(--bd)}
+tbody th,.sec th{grid-column:1/-1;border:0;padding:2px 0;text-align:left}
+td{border:0;padding:2px 0;text-align:left;font-weight:600}
+td::before{content:attr(data-l);display:block;font-weight:400;color:var(--mut);font-size:.68rem}
+.sec{display:block;border:0}.sec th{padding:8px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><h1>TCS FY2026 FP&amp;A Dashboard</h1><p>Consolidated, ₹ Crore · FY2021–25 actuals + FY2026 forecast</p></div>
+<button id="theme" aria-label="Toggle theme">◐ Theme</button></header>
+<nav id="nav"></nav>
+<div class="filters">
+<label>From<select id="from"></select></label>
+<label>To<select id="to"></select></label>
+<label>Forecast<select id="fc"><option value="1">Include FY2026F</option><option value="0">Actuals only</option></select></label>
+<button id="reset">Reset</button></div>
+<main id="view"></main>
+<p class="note">Prepared by Jishnu P. For FP&amp;A and educational use from public information; FY2026 figures are independent forecasts, not TCS guidance.</p>
+</div>
+<script>
+const YR=['FY2021','FY2022','FY2023','FY2024','FY2025'];
+const D={rev:[164177,191754,225458,240893,255324],oi:[3134,4018,3449,4422,3962],emp:[91814,107554,127522,140131,145788],eqs:[1462,1163,1881,3702,11648],fin:[637,784,779,778,796],da:[4065,4604,5022,4985,5242],oth:[24355,29980,36796,32764,30481],texp:[122333,144085,172000,182360,193955],exc:[1218,0,0,958,0],pbt:[43760,51687,56907,61997,65331],tax:[11198,13238,14604,15898,16534],np:[32562,38449,42303,46099,48797],ebit:[44397,52471,57686,62775,66127],ta:[130759,141514,143651,146449,159629],te:[87108,89846,91206,91319,95771],tl:[43651,51668,52445,55130,63858],cash:[6858,12488,7123,9016,8342],debt:[11501,6756,1498,493,34],tr:[30079,34074,41049,44434,50142],ur:[6583,7736,8905,9143,8904],tp:[7860,8045,10515,9981,13909],udr:[3650,3635,3843,3640,4028],wc:[65125,65959,66712,66880,70010],owc:[25152,30130,35596,39956,41109],ocf:[38802,39949,41965,44338,48908],icf:[-8129,-897,39,6026,-2318],fncf:[-32634,-33581,-47878,-48536,-47438],capex:[-3075,-2980,-2887,-2644,-3861],ca:[99280,108310,110270,112984,123011],cl:[34155,42351,43558,46104,53001]};
+const F={rev:271715.8,emp:154250.54,eqs:8285.74,fin:887.83,da:5578.54,oth:34697.05,texp:203699.695,ebit:68903.93,pbt:68016.11,tax:17387.04,np:50629.07,tr:60678.67,tp:16719.47,udr:4196.17,owc:39763.03,ocf:57553.57,capex:-3545.59,fcf:54007.98};
+const av=(a,i)=>i?(a[i]+a[i-1])/2:a[i];
+D.fcf=D.ocf.map((v,i)=>v+D.capex[i]);
+const R={g:D.rev.map((v,i)=>i?v/D.rev[i-1]-1:null),ebm:D.ebit.map((v,i)=>v/D.rev[i]),pbm:D.pbt.map((v,i)=>v/D.rev[i]),npm:D.np.map((v,i)=>v/D.rev[i]),
+roa:D.np.map((v,i)=>v/av(D.ta,i)),roe:D.np.map((v,i)=>v/av(D.te,i)),cr:D.ca.map((v,i)=>v/D.cl[i]),cash:D.cash.map((v,i)=>v/D.cl[i]),de:D.debt.map((v,i)=>v/D.te[i]),da:D.debt.map((v,i)=>v/D.ta[i]),ic:D.ebit.map((v,i)=>v/D.fin[i]),at:D.rev.map((v,i)=>v/av(D.ta,i)),
+rd:D.rev.map((v,i)=>(D.tr[i]+D.ur[i])/v*365),pd:D.texp.map((v,i)=>D.tp[i]/v*365),ocm:D.ocf.map((v,i)=>v/D.rev[i]),fcm:D.fcf.map((v,i)=>v/D.rev[i]),ocn:D.ocf.map((v,i)=>v/D.np[i])};
+const fm={n:v=>v==null?'—':Math.round(v).toLocaleString('en-IN'),p:v=>v==null?'—':(v*100).toFixed(1)+'%',x:v=>v==null?'—':v.toFixed(2)+'x',d:v=>v==null?'—':v.toFixed(1)+' d'};
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const CL=()=>[1,2,3,4,5,6].map(i=>css('--c'+i));
+const TABS={
+overview:'Overview',pl:'Income',bs:'Balance Sheet',wc:'Working Capital',cf:'Cash Flow',ratios:'Ratios',fc:'Forecast',var:'Variance',ins:'Insights'};
+let tab='overview',charts=[];
+// table row defs: [label,key,fmt] or ['#','Section']
+const TB={
+pl:[['#','Revenue'],['Revenue from operations','rev','n'],['Revenue growth','g','p'],['Other income','oi','n'],['#','Expenses'],['Employee benefit','emp','n'],['Equipment & software','eqs','n'],['Finance costs','fin','n'],['Depreciation & amortisation','da','n'],['Other operating','oth','n'],['Total expenses','texp','n'],['#','Profitability'],['EBIT','ebit','n'],['Exceptional item','exc','n'],['Profit before tax','pbt','n'],['Tax expense','tax','n'],['Net profit','np','n'],['EBIT margin','ebm','p'],['PBT margin','pbm','p'],['Net margin','npm','p']],
+bs:[['#','Balance sheet'],['Total assets','ta','n'],['Current assets','ca','n'],['Total equity','te','n'],['Total liabilities','tl','n'],['Current liabilities','cl','n'],['Cash & equivalents','cash','n'],['Total debt','debt','n']],
+wc:[['#','Operating working capital'],['Trade receivables','tr','n'],['Unbilled receivables','ur','n'],['Trade payables','tp','n'],['Unearned & deferred revenue','udr','n'],['Working capital','wc','n'],['Operating working capital','owc','n'],['Receivable days','rd','d'],['Payable days','pd','d']],
+cf:[['#','Cash flow'],['Operating cash flow','ocf','n'],['Investing cash flow','icf','n'],['Financing cash flow','fncf','n'],['CapEx','capex','n'],['Free cash flow','fcf','n'],['OCF margin','ocm','p'],['FCF margin','fcm','p'],['OCF / net profit','ocn','x']],
+ratios:[['#','Profitability'],['ROA','roa','p'],['ROE','roe','p'],['EBIT margin','ebm','p'],['Net margin','npm','p'],['#','Liquidity'],['Current ratio','cr','x'],['Cash ratio','cash','x'],['#','Leverage & coverage'],['Debt-to-equity','de','x'],['Debt-to-assets','da','x'],['Interest coverage','ic','x'],['#','Efficiency'],['Asset turnover','at','x'],['Receivable days','rd','d'],['Payable days','pd','d']]};
+const src=k=>D[k]||R[k];
+function range(){const a=+from.value,b=+to.value;return[Math.min(a,b),Math.max(a,b)]}
+function idx(){const[a,b]=range();const r=[];for(let i=a;i<=b;i++)r.push(i);return r}
+function table(def){const ix=idx();let h='<table><thead><tr><th></th>'+ix.map(i=>`<th>${YR[i]}</th>`).join('')+'</tr></thead><tbody>';
+def.forEach(r=>{if(r[0]=='#')h+=`<tr class="sec"><th colspan="${ix.length+1}">${r[1]}</th></tr>`;else h+=`<tr><th>${r[0]}</th>`+ix.map(i=>`<td data-l="${YR[i].slice(2)}">${fm[r[2]](src(r[1])[i])}</td>`).join('')+'</tr>'});return h+'</tbody></table>'}
+const cardT=(t,b)=>`<div class="card"><h3>${t}</h3>${b}</div>`;
+const chartBox=(id,t)=>`<div class="card"><h3>${t}</h3><div class="ch"><canvas id="${id}"></canvas></div></div>`;
+function mk(id,type,labels,sets,o={}){const c=CL(),tx=css('--mut'),gd=css('--bd');
+ charts.push(new Chart(document.getElementById(id),{type,data:{labels,datasets:sets.map((s,i)=>({backgroundColor:c[i%6],borderColor:c[i%6],borderWidth:type=='line'?2.5:0,tension:.3,borderRadius:4,pointRadius:3,...s}))},
+ options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:tx,boxWidth:12,usePointStyle:true}}},scales:{x:{stacked:!!o.stack,ticks:{color:tx},grid:{display:false}},y:{stacked:!!o.stack,ticks:{color:tx,callback:v=>o.pct?(v*100).toFixed(0)+'%':v>=1000||v<=-1000?(v/1000)+'k':v},grid:{color:gd}}}}}))}
+const L=()=>idx().map(i=>YR[i].replace('FY20','FY'));
+const S=(k,lab,o={})=>({label:lab,data:idx().map(i=>src(k)[i]),...o});
+function kpi(l,k,fk){const i=range()[1],v=src(k)[i],pv=i?src(k)[i-1]:null;const ch=pv?(v-pv)/Math.abs(pv):null;
+ let fh='';if(fc.value=='1'&&i==4&&F[fk]!=null){const f=F[fk];fh=`<div style="font-size:.75rem;color:var(--mut)">FY26F ${fm.n(f)} <span class="${f>=v?'up':'dn'}">${f>=v?'▲':'▼'}${Math.abs((f-v)/Math.abs(v)*100).toFixed(1)}%</span></div>`}
+ return`<div class="card kpi"><small>${l} · ${YR[i].slice(2)}</small><b>₹${fm.n(v)}</b>${ch!=null?`<span class="${ch>=0?'up':'dn'}">${ch>=0?'▲':'▼'} ${Math.abs(ch*100).toFixed(1)}% YoY</span>`:'<span>&nbsp;</span>'}${fh}</div>`}
+const VAR=[['Revenue','rev','inc'],['Employee benefit','emp','exp'],['Equipment & software','eqs','exp'],['Finance cost','fin','exp'],['D&A','da','exp'],['Other operating','oth','exp'],['Tax','tax','exp'],['EBIT','ebit','inc'],['PBT','pbt','inc'],['Net profit','np','inc'],['Trade receivables','tr','exp'],['Trade payables','tp','inc'],['Unearned & deferred rev.','udr','inc'],['Operating working capital','owc','exp'],['Operating cash flow','ocf','inc'],['CapEx','capex','inc'],['Free cash flow','fcf','inc']];
+const A25=k=>k=='tr'?59046:src(k)[4];
+const vrow=r=>{const a=A25(r[1]),f=F[r[1]],v=r[2]=='inc'?f-a:a-f;return{l:r[0],a,f,v,p:v/Math.abs(a),ok:v>=0}};
+const ASM=[['Revenue growth','6.0%','6.4%','Avg of FY24–25 growth'],['Employee benefit % rev','57.1%','56.8%','5-yr average'],['Equipment & software % rev','4.6%','3.0%','Avg of FY24–25'],['Finance cost % rev','0.3%','0.3%','Avg of FY23–25'],['D&A % rev','2.1%','2.1%','FY25 rate held'],['Other opex % rev','11.9%','12.8%','Avg of FY24–25'],['Tax rate','25.3%','25.6%','5-yr average'],['Receivable days','84.4','81.5','5-yr average'],['Payable days','26.2','22.5','5-yr average'],['CapEx % rev','1.5%','1.3%','Avg of FY24–25'],['U&DR % rev','1.6%','1.5%','Avg of FY24–25']];
+const INS=[['Revenue growth','FY2026 revenue is forecast up 6.42% on FY2025. Growth continues but at a moderate pace.'],['Profitability','EBIT +4.20% and net profit +3.75%: profit grows slower than revenue, so expenses add some pressure.'],['Receivables','Trade receivables +2.77%. More cash stays with customers, so collections need watching.'],['Payables','Trade payables +20.21% supports cash, but should be monitored to avoid supplier strain.'],['Operating working capital','Falls by ₹1,345.97 crore, which is positive for cash flow.'],['Operating cash flow','Up 17.68% to ₹57,553.57 crore: more cash from normal operations.'],['Free cash flow','Up 19.89% to ₹54,007.98 crore after capital expenditure.'],['Overall','A positive outlook: revenue and profit grow, cash flows improve, backed by strong liquidity and very low leverage.']];
+function render(){charts.forEach(c=>c.destroy());charts=[];const v=document.getElementById('view');
+ nav.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.t==tab));
+ const lb=L(),withF=fc.value=='1'&&range()[1]==4;
+ if(tab=='overview'){
+  v.innerHTML='<div class="kpis">'+kpi('Revenue','rev','rev')+kpi('EBIT','ebit','ebit')+kpi('Net profit','np','np')+kpi('Op. cash flow','ocf','ocf')+kpi('Free cash flow','fcf','fcf')+kpi('Op. working cap.','owc','owc')+'</div><div class="grid">'+chartBox('c1','Revenue vs net profit (₹ Cr)')+chartBox('c2','Margins')+chartBox('c3','Cash flow (₹ Cr)')+chartBox('c4','Expense mix % of revenue')+'</div>';
+  const ext=(a,f)=>withF?[...a,f]:a,lab=withF?[...lb,'FY26F']:lb,fcol=(n)=>withF?{segment:0}:{};
+  mk('c1','bar',lab,[{label:'Revenue',data:ext(S('rev').data,F.rev)},{label:'Net profit',data:ext(S('np').data,F.np)}]);
+  mk('c2','line',lb,[S('ebm','EBIT'),S('pbm','PBT'),S('npm','Net')],{pct:1});
+  mk('c3','bar',lab,[{label:'Operating',data:ext(S('ocf').data,F.ocf)},{label:'Free cash flow',data:ext(S('fcf').data,F.fcf)}]);
+  mk('c4','bar',lb,[['emp','Employee'],['eqs','Equip/SW'],['oth','Other opex'],['da','D&A']].map(([k,l])=>({label:l,data:idx().map(i=>D[k][i]/D.rev[i])})),{stack:1,pct:1});
+ }else if(TB[tab]){
+  const g={pl:[['Income & expenses',()=>mk('a','bar',lb,[S('rev','Revenue'),S('texp','Expenses'),S('np','Net profit')])],['Expense breakdown (₹ Cr)',()=>mk('b','bar',lb,[['emp','Employee'],['eqs','Equip/SW'],['oth','Other opex'],['da','D&A'],['fin','Finance']].map(([k,l])=>S(k,l)),{stack:1})]],
+  bs:[['Assets, equity & liabilities',()=>mk('a','bar',lb,[S('ta','Assets'),S('te','Equity'),S('tl','Liabilities')])],['Cash vs debt',()=>mk('b','line',lb,[S('cash','Cash'),S('debt','Debt')])]],
+  wc:[['Receivables, payables & OWC',()=>mk('a','bar',lb,[S('tr','Receivables'),S('tp','Payables'),S('owc','Op. WC')])],['Collection vs payment days',()=>mk('b','line',lb,[S('rd','Receivable days'),S('pd','Payable days')])]],
+  cf:[['Operating / investing / financing',()=>mk('a','bar',lb,[S('ocf','Operating'),S('icf','Investing'),S('fncf','Financing')])],['Free cash flow & margin',()=>mk('b','bar',lb,[S('fcf','FCF'),S('capex','CapEx')])]],
+  ratios:[['Profitability',()=>mk('a','line',lb,[S('roa','ROA'),S('roe','ROE'),S('npm','Net margin')],{pct:1})],['Liquidity & coverage',()=>mk('b','line',lb,[S('cr','Current ratio'),S('cash','Cash ratio'),S('at','Asset turnover')])]]}[tab];
+  v.innerHTML='<div class="grid">'+chartBox('a',g[0][0])+chartBox('b',g[1][0])+'</div>'+cardT('Data table',table(TB[tab]));g[0][1]();g[1][1]();
+ }else if(tab=='fc'){
+  const ks=[['Revenue','rev'],['EBIT','ebit'],['Net profit','np'],['OCF','ocf'],['FCF','fcf']];
+  v.innerHTML='<div class="grid">'+chartBox('a','FY2025 actual vs FY2026 forecast (₹ Cr)')+chartBox('b','FY2026F expense structure')+'</div>'+cardT('Forecast assumptions','<table><thead><tr><th>Driver</th><th>FY25A</th><th>FY26F</th><th>Method</th></tr></thead><tbody>'+ASM.map(r=>`<tr><th>${r[0]}</th><td data-l="FY25A">${r[1]}</td><td data-l="FY26F">${r[2]}</td><td data-l="Basis" style="text-align:left">${r[3]}</td></tr>`).join('')+'</tbody></table>');
+  mk('a','bar',ks.map(k=>k[0]),[{label:'FY2025A',data:ks.map(k=>src(k[1])[4])},{label:'FY2026F',data:ks.map(k=>F[k[1]])}]);
+  mk('b','doughnut',['Employee','Equip/SW','Other opex','D&A','Finance'],[{data:['emp','eqs','oth','da','fin'].map(k=>F[k]),backgroundColor:CL(),borderWidth:0}]);
+ }else if(tab=='var'){
+  const rs=VAR.map(vrow);
+  v.innerHTML='<div class="grid">'+chartBox('a','Variance % (positive = favourable)')+'</div>'+cardT('FY2026F vs FY2025A','<table><thead><tr><th></th><th>FY25A</th><th>FY26F</th><th>Variance</th><th>Var %</th><th></th></tr></thead><tbody>'+rs.map(r=>`<tr><th>${r.l}</th><td data-l="FY25A">${fm.n(r.a)}</td><td data-l="FY26F">${fm.n(r.f)}</td><td data-l="Var">${fm.n(r.v)}</td><td data-l="Var %">${fm.p(r.p)}</td><td data-l="Status"><span class="badge ${r.ok?'F':'UF'}">${r.ok?'F':'UF'}</span></td></tr>`).join('')+'</tbody></table>');
+  const c=document.getElementById('a');mk('a','bar',rs.map(r=>r.l),[{label:'Variance %',data:rs.map(r=>r.p),backgroundColor:rs.map(r=>r.ok?css('--c2'):css('--c4'))}],{pct:1});charts[0].options.indexAxis='y';charts[0].options.plugins.legend.display=false;c.parentElement.style.height=Math.max(300,rs.length*30)+'px';charts[0].update();
+ }else{v.innerHTML='<div class="ins">'+INS.map(i=>cardT(i[0],`<p>${i[1]}</p>`)).join('')+'</div>'}
+ filtersEl.style.display=['fc','var','ins'].includes(tab)?'none':'flex'}
+const filtersEl=document.querySelector('.filters');
+YR.forEach((y,i)=>{from.add(new Option(y,i));to.add(new Option(y,i))});from.value=0;to.value=4;
+Object.entries(TABS).forEach(([k,l])=>{const b=document.createElement('button');b.textContent=l;b.dataset.t=k;b.onclick=()=>{tab=k;render()};nav.append(b)});
+[from,to,fc].forEach(e=>e.onchange=render);
+reset.onclick=()=>{from.value=0;to.value=4;fc.value=1;render()};
+theme.onclick=()=>{const r=document.documentElement,d=matchMedia('(prefers-color-scheme:dark)').matches;const cur=r.dataset.theme||(d?'dark':'light');r.dataset.theme=cur=='dark'?'light':'dark';render()};
+matchMedia('(prefers-color-scheme:dark)').onchange=render;
+render();
+</script>
+</body>
+</html>
